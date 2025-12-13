@@ -1,19 +1,18 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import Home from "./Components/Home";
-import { BrowserRouter, Routes, Route } from "react-router";
-import DSADashboard from "./Components/DSADashboard.js";
-import BubbleSortVisualizer from "./Components/Algorithm.js/BubbleSort";
-import InsertionSortVisualizer from "./Components/Algorithm.js/InsertionSort.js";
-import SelectionSortVisualizer from "./Components/Algorithm.js/SelectionSort.js";
-import BFSVisualizer from "./Components/Algorithm.js/BFSinGraph.js";
-import LinearSearchVisualizer from "./Components/Algorithm.js/LinearSearch.js";
-import BinarySearchVisualizer from "./Components/Algorithm.js/BinarySearch.js";
-import { Provider } from "react-redux";
-import { store } from "./Stores/store.js";
 import Header from "./Components/Header";
+import Home from "./Components/Home";
 
-function App() {
+import { BrowserRouter, Routes, Route } from "react-router";
+import DSADashboard from "./Components/DSADashboard";
+
+import BubbleSortVisualizer from "./Components/Algorithm.js/BubbleSort";
+import InsertionSortVisualizer from "./Components/Algorithm.js/InsertionSort";
+import SelectionSortVisualizer from "./Components/Algorithm.js/SelectionSort"
+import BFSVisualizer from "./Components/Algorithm.js/BFSinGraph";
+import LinearSearchVisualizer from "./Components/Algorithm.js/LinearSearch";
+import BinarySearchVisualizer from "./Components/Algorithm.js/BinarySearch";
+import ThemeWrapper from "./ThemeWrapper"; // NEW COMPONENT
+
+export default function App() {
   const algorithmRoutes = [
     { path: "Bubble-Sort", element: <BubbleSortVisualizer /> },
     { path: "Insertion-Sort", element: <InsertionSortVisualizer /> },
@@ -24,9 +23,10 @@ function App() {
   ];
 
   return (
-    <Provider store={store}>
+    <ThemeWrapper>
       <BrowserRouter>
-        <Header />   {/* Always visible */}
+        <Header />
+
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/algorithms" element={<DSADashboard />} />
@@ -36,10 +36,6 @@ function App() {
           ))}
         </Routes>
       </BrowserRouter>
-    </Provider>
+    </ThemeWrapper>
   );
 }
-
-export default App;
-
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);

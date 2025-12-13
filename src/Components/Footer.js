@@ -1,76 +1,199 @@
+import { Github, Twitter, Linkedin, Mail, Terminal } from "lucide-react";
+import { useSelector } from "react-redux";
+import { Link } from "react-router";
+import { motion } from "framer-motion";
+
+// --- ANIMATION VARIANTS (Matching Body) ---
+const blobVariants = {
+  animate: {
+    scale: [1, 1.1, 1],
+    rotate: [0, 30, 0],
+    x: [0, 30, 0],
+    y: [0, -30, 0],
+    transition: { duration: 10, repeat: Infinity, ease: "easeInOut" },
+  },
+};
+
 export default function Footer() {
+  const theme = useSelector((state) => state.theme.value);
+  const isDark = theme === "dark";
+
+  // Social Link: Subtle hover glow matching Body
+  const SocialLink = ({ href, icon: Icon }) => (
+    <a
+      href={href}
+      className={`p-2 rounded-lg transition-all duration-300 group
+        ${isDark 
+          ? "hover:bg-white/10 text-gray-500 hover:text-white" 
+          : "hover:bg-purple-100/50 text-slate-400 hover:text-purple-600"}
+      `}
+    >
+      <Icon size={20} strokeWidth={1.5} className="transition-transform group-hover:scale-110" />
+    </a>
+  );
+
+  // Footer Link: Clean typography with color shift
+  const FooterLink = ({ to, label }) => (
+    <li>
+      <Link 
+        to={to} 
+        className={`
+          text-sm font-medium block py-1 transition-colors duration-200
+          ${isDark 
+            ? "text-gray-500 hover:text-purple-300" 
+            : "text-slate-500 hover:text-purple-600"}
+        `}
+      >
+        {label}
+      </Link>
+    </li>
+  );
+
   return (
-    <footer className="bg-gray-900 text-gray-300 border-t border-gray-800">
-   
-      <div className="container mx-auto px-4 py-12">
-       
-        {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer 
+      className={`relative w-full overflow-hidden border-t font-sans transition-colors duration-700
+        ${isDark 
+          ? "bg-[#050505] text-white border-white/5" 
+          : "bg-[#F8FAFC] text-slate-900 border-slate-200/60"}
+      `}
+    >
+      {/* =========================================
+          BACKGROUND SYSTEM (Matches Body)
+      ========================================= */}
+      
+      {/* 1. Technical Grid Overlay */}
+      <div 
+        className={`absolute inset-0 pointer-events-none z-0 
+        ${isDark ? "opacity-[0.1]" : "opacity-[0.25]"}`}
+        style={{
+          backgroundImage: `linear-gradient(${isDark ? '#333' : '#cbd5e1'} 1px, transparent 1px), linear-gradient(90deg, ${isDark ? '#333' : '#cbd5e1'} 1px, transparent 1px)`,
+          backgroundSize: '40px 40px',
+          maskImage: 'linear-gradient(to top, black, transparent 90%)' // Fade out at top
+        }}
+      />
+
+      {/* 2. Ambient Blobs (Bottom Focused) */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          variants={blobVariants}
+          animate="animate"
+          className={`absolute -bottom-[20%] -left-[10%] w-[500px] h-[500px] rounded-full blur-[100px] opacity-20
+            ${isDark ? "bg-purple-900 mix-blend-screen" : "bg-purple-300 mix-blend-multiply"}
+          `}
+        />
+        <motion.div
+          variants={blobVariants}
+          animate="animate"
+          transition={{ delay: 2 }}
+          className={`absolute -bottom-[20%] -right-[10%] w-[400px] h-[400px] rounded-full blur-[100px] opacity-20
+            ${isDark ? "bg-blue-900 mix-blend-screen" : "bg-cyan-200 mix-blend-multiply"}
+          `}
+        />
+      </div>
+
+      {/* =========================================
+          CONTENT
+      ========================================= */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 pt-24 pb-12">
+        
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-12 md:gap-8 mb-20">
           
-          {/* Brand Info */}
-          <div className="md:col-span-2">
-            <div className="flex items-center mb-4">
-              <span className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+          {/* Brand Column */}
+          <div className="md:col-span-2 space-y-6">
+            <Link to="/" className="flex items-center gap-3 w-fit group">
+              <div className={`
+                p-2.5 rounded-xl border backdrop-blur-md transition-all duration-300
+                ${isDark 
+                  ? "bg-white/5 border-white/10 group-hover:bg-white/10 group-hover:shadow-[0_0_15px_rgba(168,85,247,0.3)]" 
+                  : "bg-white/60 border-white/60 shadow-sm group-hover:shadow-purple-200 group-hover:bg-white"}
+              `}>
+                <Terminal size={20} className={isDark ? "text-purple-300" : "text-purple-600"} />
+              </div>
+              <span className={`text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r 
+                ${isDark ? "from-indigo-300 via-purple-300 to-pink-300" : "from-indigo-600 via-purple-600 to-pink-600"}
+              `}>
                 AlgoArena
               </span>
-            </div>
-            <p className="text-sm mb-4">
-              Visualize. Race. Master algorithms through interactive learning.
+            </Link>
+            
+            <p className={`text-sm leading-relaxed max-w-xs font-medium
+              ${isDark ? "text-gray-500" : "text-slate-500"}
+            `}>
+              Visualizing the complexity of code. Build, race, and master algorithms in a high-performance environment.
             </p>
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-indigo-400 transition">
-                <span className="sr-only">GitHub</span>
-                <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
-                </svg>
-              </a>
-              <a href="#" className="text-gray-400 hover:text-indigo-400 transition">
-                <span className="sr-only">Twitter</span>
-                <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
-                </svg>
-              </a>
+
+            {/* Social Icons */}
+            <div className="flex items-center gap-2 pt-2">
+              <SocialLink href="#" icon={Github} />
+              <SocialLink href="#" icon={Twitter} />
+              <SocialLink href="#" icon={Linkedin} />
+              <SocialLink href="#" icon={Mail} />
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Spacer (Desktop) */}
+          <div className="hidden md:block md:col-span-1" />
+
+          {/* Links Columns */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-200 uppercase tracking-wider mb-4">
-              Algorithms
-            </h3>
-            <ul className="space-y-2">
-              <li><a href="#" className="text-sm hover:text-indigo-400 transition">Sorting</a></li>
-              <li><a href="#" className="text-sm hover:text-indigo-400 transition">Searching</a></li>
-              <li><a href="#" className="text-sm hover:text-indigo-400 transition">Pathfinding</a></li>
-              <li><a href="#" className="text-sm hover:text-indigo-400 transition">Trees</a></li>
+            <h4 className={`font-bold mb-6 text-xs uppercase tracking-widest ${isDark ? "text-white" : "text-slate-900"}`}>
+              Product
+            </h4>
+            <ul className="space-y-3">
+              <FooterLink to="/algorithms" label="Visualizer" />
+              <FooterLink to="/race" label="Algo Racing" />
+              <FooterLink to="/challenges" label="Challenges" />
+              <FooterLink to="/pricing" label="Pricing" />
             </ul>
           </div>
 
-          {/* Resources */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-200 uppercase tracking-wider mb-4">
+            <h4 className={`font-bold mb-6 text-xs uppercase tracking-widest ${isDark ? "text-white" : "text-slate-900"}`}>
               Resources
-            </h3>
-            <ul className="space-y-2">
-              <li><a href="#" className="text-sm hover:text-indigo-400 transition">Documentation</a></li>
-              <li><a href="#" className="text-sm hover:text-indigo-400 transition">Tutorials</a></li>
-              <li><a href="#" className="text-sm hover:text-indigo-400 transition">Blog</a></li>
-              <li><a href="#" className="text-sm hover:text-indigo-400 transition">GitHub</a></li>
+            </h4>
+            <ul className="space-y-3">
+              <FooterLink to="/docs" label="Documentation" />
+              <FooterLink to="/api" label="API Reference" />
+              <FooterLink to="/blogs" label="Engineering Blog" />
+              <FooterLink to="/community" label="Community" />
             </ul>
+          </div>
+
+          <div>
+            <h4 className={`font-bold mb-6 text-xs uppercase tracking-widest ${isDark ? "text-white" : "text-slate-900"}`}>
+              Company
+            </h4>
+            <ul className="space-y-3">
+              <FooterLink to="/about" label="About Us" />
+              <FooterLink to="/careers" label="Careers" />
+              <FooterLink to="/brand" label="Brand Kit" />
+              <FooterLink to="/contact" label="Contact" />
+            </ul>
+          </div>
+
+        </div>
+
+        {/* Bottom Bar */}
+        <div className={`flex flex-col md:flex-row justify-between items-center gap-6 pt-8 border-t backdrop-blur-sm
+          ${isDark ? "border-white/5" : "border-slate-200/60"}
+        `}>
+          <p className={`text-xs font-medium ${isDark ? "text-gray-600" : "text-slate-400"}`}>
+            © {new Date().getFullYear()} AlgoArena Inc. All rights reserved.
+          </p>
+
+          <div className="flex gap-8">
+            <Link to="/privacy" className={`text-xs font-medium transition-colors hover:text-purple-500 ${isDark ? "text-gray-600" : "text-slate-400"}`}>
+              Privacy Policy
+            </Link>
+            <Link to="/terms" className={`text-xs font-medium transition-colors hover:text-purple-500 ${isDark ? "text-gray-600" : "text-slate-400"}`}>
+              Terms of Service
+            </Link>
+            <Link to="/cookies" className={`text-xs font-medium transition-colors hover:text-purple-500 ${isDark ? "text-gray-600" : "text-slate-400"}`}>
+              Cookie Settings
+            </Link>
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="mt-12 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-xs text-gray-500">
-            &copy; {new Date().getFullYear()} AlgoArena. All rights reserved.
-          </p>
-          <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="#" className="text-xs text-gray-500 hover:text-indigo-400 transition">Privacy Policy</a>
-            <a href="#" className="text-xs text-gray-500 hover:text-indigo-400 transition">Terms of Service</a>
-            <a href="#" className="text-xs text-gray-500 hover:text-indigo-400 transition">Contact</a>
-          </div>
-        </div>
       </div>
     </footer>
   );
