@@ -558,6 +558,20 @@ const VisualizationArea = ({ array, sorted, sortOrder, currentKeyIndex, highligh
         const arrayLeftOffset = (containerRect.width - totalWidth) / 2;
         return arrayLeftOffset + relativeX;
     }
+  }, [sortState, nextAction, array, sortedIndices, complexity, addStep, sortOrder, isFinished, shiftedItemIds]);
+
+  useEffect(() => {
+    let timer;
+    if (isSorting && !isPaused && !isFinished) {
+      timer = setTimeout(runSortStep, 1100 - speed * 10);
+    }
+    return () => clearTimeout(timer);
+  }, [isSorting, isPaused, isFinished, runSortStep, speed]);
+
+  useEffect(() => {
+    if (logViewRef.current) {
+      const container = logViewRef.current;
+      const currentStepElement = container.querySelector(`[data-step-index="${currentStep}"]`);
 
     const getAbsoluteY = (relativeY) => {
         if (!containerRef.current) return 0;
