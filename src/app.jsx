@@ -10,7 +10,7 @@ import SelectionSortVisualizer from "./Components/Algorithm.js/SelectionSort"
 import BFSVisualizer from "./Components/Algorithm.js/BFSinGraph";
 import LinearSearchVisualizer from "./Components/Algorithm.js/LinearSearch";
 import BinarySearchVisualizer from "./Components/Algorithm.js/BinarySearch";
-import ThemeWrapper from "./ThemeWrapper"; // NEW COMPONENT
+import ThemeWrapper from "./ThemeWrapper";
 
 export default function App() {
   const algorithmRoutes = [
