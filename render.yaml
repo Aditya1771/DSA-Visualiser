@@ -1,0 +1,9 @@
+services:
+  - type: static
+    name: dsa-visualiser
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
