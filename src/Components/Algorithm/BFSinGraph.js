@@ -1,6 +1,31 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router";
 import { motion } from "framer-motion";
+import {
+  Home,
+  ChevronRight,
+  LayoutGrid,
+  BrainCircuit,
+  BarChart3,
+  Link2,
+  Copy,
+  Share2,
+  Wand2,
+  CheckCircle2,
+  XCircle,
+  Activity,
+    ArrowUpDown,
+  ArrowUpNarrowWide,
+  Code2,
+  Clock,
+  Maximize,
+} from "lucide-react";
+import GlossyButton from "../Utils/GlossyButton";
+import PremiumCodeReference from "../Utils/PremiumCodeReference";
+import QuizArena from "../Utils/QuizArena";
+import BFSControls from "../Utils/BFSControls";
+import BFSLogView from "../Utils/BFSLogView";
 
 // --- THEME UTILS & CONSTANTS ---
 const blobVariants = {
@@ -13,101 +38,34 @@ const blobVariants = {
   },
 };
 
-// --- ICON COMPONENT ---
-const Icon = ({ name, className = "w-4 h-4" }) => {
-  const icons = {
-    chart: <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V5.25A2.25 2.25 0 0 0 18 3H6A2.25 2.25 0 0 0 3.75 5.25v12.75A2.25 2.25 0 0 0 6 20.25Z" />,
-    controls: <path strokeLinecap="round" strokeLinejoin="round" d="M6 13.5V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m12-3V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 9.75V10.5" />,
-    edit: <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />,
-    queue: <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z" />,
-    node: <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />,
-    edge: <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />,
-    play: <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />,
-    pause: <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25v13.5m-6-13.5v13.5" />,
-    stepBack: <path strokeLinecap="round" strokeLinejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5" />,
-    stepForward: <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />,
-    addNode: <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />,
-    addEdge: <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />,
-    clear: <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.067-2.09 1.02-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />,
-    reset: <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 11.667 0l3.181-3.183m-4.991-2.691V7.5a3.75 3.75 0 0 1 3.75-3.75H18a3.75 3.75 0 0 1 3.75 3.75v.492" />,
-    example: <><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75" /><path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></>,
-    json: <path strokeLinecap="round" strokeLinejoin="round" d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5-4.5L7.5 12l2.25 2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V5.25A2.25 2.25 0 0 0 18 3H6A2.25 2.25 0 0 0 3.75 5.25v12.75A2.25 2.25 0 0 0 6 20.25Z" />,
-    info: <><path strokeLinecap="round" strokeLinejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.852l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></>,
-    visualization: <><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.432 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></>,
-    bfs: <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V1.5m0 5.25L3 12m6-5.25 6 5.25M3 12l6 5.25m-6-5.25h12m6 0-6 5.25m6-5.25-6-5.25m6 5.25v5.25" />,
-    copy: <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2m-6 12h8a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-8a2 2 0 0 0 2 2Z" />,
-    share: <path strokeLinecap="round" strokeLinejoin="round" d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6m4-3 5 5-5 5m5-5H9" />,
-    check: <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />,
-    xmark: <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />,
-    time: <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />,
-    space: <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m4.5 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />,
-    home: <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />,
-    grid: <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />,
-    code: <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 15" />,
-    comparisons: <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />,
-  };
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-      {icons[name] || <circle cx="12" cy="12" r="10" />}
-    </svg>
-  );
-};
-
-// --- GLOSSY BUTTON ---
-const GlossyButton = ({ onClick, disabled, gradientClasses, children, className = '', pulse = true, isDark = true }) => (
-    <div className={`relative group ${className}`}>
-        <div
-            className={`absolute -inset-0.5 ${gradientClasses} rounded-2xl blur-md opacity-60 group-hover:opacity-90 transition duration-300 ${
-                disabled ? 'hidden' : ''
-            } ${pulse ? 'animate-pulse' : ''}`}
-        />
-        <button
-            onClick={onClick}
-            disabled={disabled}
-            className={`relative w-full h-full p-px text-sm font-semibold rounded-2xl overflow-hidden transition-all duration-300
-                ${!disabled ? gradientClasses : 'bg-gray-500/50'}
-                ${isDark ? 'text-gray-200' : 'text-white'}
-                disabled:cursor-not-allowed`}
-        >
-            <div className={`relative w-full h-full flex items-center justify-center gap-2 px-3 py-2.5 backdrop-blur-sm rounded-[15px] transition-colors duration-300 
-                ${isDark ? 'bg-gray-900/80 group-hover:bg-gray-900/70' : 'bg-white/30 group-hover:bg-white/40'}`}>
-                <span className="absolute top-0 left-[-150%] w-[200%] h-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-all duration-700 ease-in-out group-hover:left-[100%]" />
-                <span className="relative z-10 flex items-center justify-center gap-2 shadow-sm text-shadow">
-                    {children}
-                </span>
-            </div>
-        </button>
-    </div>
-);
-
 // --- BREADCRUMB ---
 const Breadcrumb = ({ isDark }) => (
   <nav aria-label="Breadcrumb">
     <ol className={`flex items-center gap-2 text-sm font-medium ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>
       <li>
         <a href="/" className={`flex items-center gap-2 transition-all duration-200 hover:-translate-y-0.5 ${isDark ? 'hover:text-white' : 'hover:text-purple-600'}`}>
-          <Icon name="home" className="w-4 h-4" />
+          <Home className="w-4 h-4" />
           <span className="hidden sm:inline">Home</span>
         </a>
       </li>
       <li>
-        <Icon name="chevronRight" className={`w-4 h-4 ${isDark ? 'text-gray-600' : 'text-slate-300'}`} />
+        <ChevronRight className={`w-4 h-4 ${isDark ? 'text-gray-600' : 'text-slate-300'}`} />
       </li>
       <li>
         <a href="/algorithms" className={`flex items-center gap-2 transition-all duration-200 hover:-translate-y-0.5 ${isDark ? 'hover:text-white' : 'hover:text-purple-600'}`}>
-           <Icon name="grid" className="w-4 h-4" />
+           <LayoutGrid className="w-4 h-4" />
            <span className="hidden sm:inline">Dashboard</span>
         </a>
       </li>
       <li>
-         <Icon name="chevronRight" className={`w-4 h-4 ${isDark ? 'text-gray-600' : 'text-slate-300'}`} />
+         <ChevronRight className={`w-4 h-4 ${isDark ? 'text-gray-600' : 'text-slate-300'}`} />
       </li>
       <li>
         <div className={`flex items-center gap-2 px-3 py-1 rounded-lg border backdrop-blur-md cursor-default
             ${isDark 
               ? "bg-white/5 border-white/10 text-white shadow-[0_0_10px_rgba(255,255,255,0.05)]" 
               : "bg-white/60 border-slate-200 text-slate-700 shadow-sm"}`}>
-          <Icon name="bfs" className={`w-4 h-4 ${isDark ? "text-purple-400" : "text-purple-600"}`} />
+          <BrainCircuit className={`w-4 h-4 ${isDark ? "text-purple-400" : "text-purple-600"}`} />
           <span className="font-semibold">BFS Visualizer</span>
         </div>
       </li>
@@ -220,132 +178,20 @@ const ComplexityDisplay = ({ complexity, isDark }) => {
   return (
     <section className={`${cardClass} rounded-xl p-6 border transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-purple-600/20`}>
         <h2 className={`flex items-center gap-2 text-lg font-semibold mb-4 ${titleClass}`}>
-            <Icon name="chart"/>Analysis
+            <BarChart3 className="w-4 h-4"/>Complexity Analysis
         </h2>
         <div className="grid grid-cols-2 gap-4">
             <div className="bg-gradient-to-br from-indigo-600/20 to-indigo-800/40 p-3 rounded-lg border border-indigo-700/50">
-                <h3 className="flex items-center gap-2 text-xs text-indigo-400 mb-1"><Icon name="node"/>Nodes Visited</h3>
+                <h3 className="flex items-center gap-2 text-xs text-indigo-400 mb-1"><BrainCircuit className="w-4 h-4"/>Nodes Visited</h3>
                 <span className="text-xl font-bold text-indigo-400"><AnimatedNumber value={complexity.nodesVisited} /></span>
             </div>
             <div className="bg-gradient-to-br from-pink-600/20 to-pink-800/40 p-3 rounded-lg border border-pink-700/50">
-                <h3 className="flex items-center gap-2 text-xs text-pink-400 mb-1"><Icon name="edge"/>Edges Traversed</h3>
+                <h3 className="flex items-center gap-2 text-xs text-pink-400 mb-1"><Link2 className="w-4 h-4"/>Edges Traversed</h3>
                 <span className="text-xl font-bold text-pink-400"><AnimatedNumber value={complexity.edgesTraversed} /></span>
             </div>
         </div>
     </section>
   );
-};
-
-const Controls = ({
-    isFinished, isPaused, graph, currentStep, steps, speed, editMode,
-    startNodeId, setStartNodeId, graphType, setGraphType, isSorting,
-    toggleSorting, stepBackward, stepForward, setSpeed, setEditMode, 
-    handleClearGraph, handleReset, loadExampleGraph, getEditModeMessage, customInput, setCustomInput, handleCustomGraph, isDark
-}) => {
-    const playPauseStyles = !isPaused
-      ? { gradient: "bg-gradient-to-r from-yellow-400 to-orange-500" }
-      : { gradient: "bg-gradient-to-r from-green-400 to-emerald-500" };
-
-    const cardClass = isDark 
-      ? "bg-[#0A0A0A]/60 border-white/5 backdrop-blur-md" 
-      : "bg-white/80 border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-2xl";
-    const textClass = isDark ? "text-gray-300" : "text-slate-700";
-    const labelClass = isDark ? "text-gray-400" : "text-slate-500";
-    const inputClass = isDark 
-        ? "bg-gray-900/80 border-white/10 text-white focus:ring-purple-500 disabled:bg-gray-800/50" 
-        : "bg-white border-slate-200 text-slate-800 focus:ring-purple-500 disabled:bg-slate-100 disabled:text-slate-400";
-    const selectClass = isDark
-        ? "bg-gray-900/80 border-white/10 text-white"
-        : "bg-white border-slate-200 text-slate-800";
-
-    return (
-      <section className={`${cardClass} rounded-2xl p-6 border transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-purple-600/20 h-full`}>
-        <h2 className={`flex items-center gap-2 text-lg font-semibold mb-4 ${textClass}`}>
-          <Icon name="controls"/>Controls
-        </h2>
-        <div className="flex flex-col space-y-6">
-            
-            <div className="grid grid-cols-3 gap-3">
-              <div className="col-span-2">
-                <GlossyButton onClick={toggleSorting} disabled={isFinished || graph.nodes.length === 0} gradientClasses={playPauseStyles.gradient} className="w-full" isDark={isDark}>
-                  {!isPaused ? <><Icon name="pause"/>Pause</> : <><Icon name="play"/>Play</>}
-                </GlossyButton>
-              </div>
-              <GlossyButton onClick={handleReset} gradientClasses="bg-gradient-to-r from-red-500 to-pink-500" className="w-full" isDark={isDark}>
-                <Icon name="arrow-refresh" />
-              </GlossyButton>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-3">
-              <GlossyButton onClick={stepBackward} disabled={currentStep <= 0} gradientClasses="bg-gradient-to-r from-sky-400 to-indigo-400" className="w-full" isDark={isDark}>
-                <Icon name="stepBack"/>Back
-              </GlossyButton>
-              <GlossyButton onClick={stepForward} disabled={currentStep >= steps.length - 1} gradientClasses="bg-gradient-to-r from-sky-400 to-indigo-400" className="w-full" isDark={isDark}>
-                Next<Icon name="stepForward"/>
-              </GlossyButton>
-            </div>
-
-            <div className={`space-y-3 pt-4 border-t ${isDark ? "border-gray-700/50" : "border-slate-200"}`}>
-                 <div className="grid grid-cols-2 gap-3">
-                     <div>
-                        <label className={`text-xs ${labelClass} mb-1 block`}>Start Node</label>
-                        <select
-                            value={startNodeId || ''}
-                            onChange={(e) => setStartNodeId(e.target.value)}
-                            disabled={graph.nodes.length === 0 || isSorting}
-                            className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-purple-500 text-sm ${selectClass}`}
-                        >
-                            {graph.nodes.map(n => <option key={n.id} value={n.id}>{n.id}</option>)}
-                        </select>
-                     </div>
-                     <div>
-                         <label className={`text-xs ${labelClass} mb-1 block`}>Type</label>
-                         <div className={`flex rounded-xl p-1 border ${isDark ? 'bg-gray-900/80 border-white/10' : 'bg-slate-100 border-slate-200'}`}>
-                            <button onClick={() => setGraphType('undirected')} className={`flex-1 py-1 rounded-lg text-xs font-medium transition-colors ${graphType === 'undirected' ? 'bg-purple-600 text-white' : (isDark ? 'text-gray-400 hover:text-white' : 'text-slate-500 hover:text-slate-900')}`}>Undir</button>
-                            <button onClick={() => setGraphType('directed')} className={`flex-1 py-1 rounded-lg text-xs font-medium transition-colors ${graphType === 'directed' ? 'bg-purple-600 text-white' : (isDark ? 'text-gray-400 hover:text-white' : 'text-slate-500 hover:text-slate-900')}`}>Dir</button>
-                         </div>
-                     </div>
-                 </div>
-            </div>
-
-             <div className={`space-y-3 pt-4 border-t ${isDark ? "border-gray-700/50" : "border-slate-200"}`}>
-                <h3 className={`flex items-center gap-2 text-sm font-semibold ${labelClass}`}><Icon name="edit"/>Editor</h3>
-                <div className="grid grid-cols-3 gap-2">
-                    <GlossyButton onClick={() => setEditMode('addNode')} gradientClasses={editMode === 'addNode' ? "bg-gradient-to-r from-purple-500 to-indigo-500" : (isDark ? "bg-gray-700" : "bg-slate-400")} className="w-full" pulse={false} isDark={isDark}><Icon name="addNode"/></GlossyButton>
-                    <GlossyButton onClick={() => setEditMode('addEdgeStart')} gradientClasses={editMode.startsWith('addEdge') ? "bg-gradient-to-r from-purple-500 to-indigo-500" : (isDark ? "bg-gray-700" : "bg-slate-400")} className="w-full" pulse={false} isDark={isDark}><Icon name="addEdge"/></GlossyButton>
-                    <GlossyButton onClick={() => setEditMode('removeNode')} gradientClasses={editMode === 'removeNode' ? "bg-gradient-to-r from-red-500 to-orange-500" : (isDark ? "bg-gray-700" : "bg-slate-400")} className="w-full" pulse={false} isDark={isDark}><Icon name="clear"/></GlossyButton>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                     <GlossyButton onClick={loadExampleGraph} gradientClasses="bg-gradient-to-r from-teal-400 to-emerald-500" className="w-full" pulse={false} isDark={isDark}>Example</GlossyButton>
-                     <GlossyButton onClick={handleClearGraph} gradientClasses="bg-gradient-to-r from-red-600 to-red-800" className="w-full" pulse={false} isDark={isDark}>Clear</GlossyButton>
-                </div>
-                <div className="min-h-[20px] text-[10px] text-yellow-500 text-center font-medium">{getEditModeMessage()}</div>
-            </div>
-
-            <div className={`space-y-2 pt-4 border-t ${isDark ? "border-gray-700/50" : "border-slate-200"}`}>
-              <label className={`text-xs ${labelClass}`}>Animation Speed</label>
-              <div className="flex items-center gap-3">
-                <input type="range" min="1" max="100" value={speed} onChange={(e) => setSpeed(e.target.value)} className={`w-full h-2 rounded-lg appearance-none cursor-pointer ${isDark ? "bg-gray-700" : "bg-slate-300"}`} />
-                <span className={`text-xs font-medium w-10 ${textClass}`}>{speed}%</span>
-              </div>
-            </div>
-
-             <div className={`space-y-2 pt-4 border-t ${isDark ? "border-gray-700/50" : "border-slate-200"}`}>
-                 <label className={`text-xs ${labelClass}`}>JSON Input</label>
-                 <div className="flex gap-2">
-                     <input 
-                        type="text" 
-                        value={customInput} 
-                        onChange={(e) => setCustomInput(e.target.value)}
-                        placeholder='{"nodes":..., "edges":...}'
-                        className={`w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-purple-500 text-xs font-mono ${inputClass}`}
-                     />
-                     <GlossyButton onClick={handleCustomGraph} gradientClasses="bg-gradient-to-r from-purple-500 to-pink-500" className="w-20 text-xs" isDark={isDark}>Load</GlossyButton>
-                 </div>
-             </div>
-        </div>
-      </section>
-    );
 };
 
 const QueueDisplay = ({ queue, isDark }) => {
@@ -358,7 +204,7 @@ const QueueDisplay = ({ queue, isDark }) => {
     return (
     <section className={`${cardClass} rounded-xl p-6 border shadow-lg`}>
         <h2 className={`flex items-center gap-2 text-lg font-semibold mb-4 ${titleClass}`}>
-            <Icon name="queue"/>Queue
+            <Activity className="w-4 h-4" />Queue
         </h2>
         <div className={`flex items-center rounded-xl p-4 min-h-[5rem] overflow-x-auto border ${innerBg}`}>
             <span className="text-xs font-bold text-gray-500 mr-4 uppercase tracking-wider">Front</span>
@@ -425,7 +271,7 @@ const VisualizationArea = ({
             
             <div className="flex justify-between items-center mb-4 relative z-10">
                  <h2 className={`flex items-center gap-2 text-lg font-semibold ${titleClass}`}>
-                    <Icon name="chart"/>Graph Visualization
+                    <BarChart3 className="w-4 h-4" />Graph Visualization
                 </h2>
                 {startNodeId && <span className="text-xs text-purple-500 bg-purple-100 dark:bg-purple-400/10 px-2 py-1 rounded border border-purple-200 dark:border-purple-400/20 font-medium">Start: {startNodeId}</span>}
             </div>
@@ -488,62 +334,161 @@ const VisualizationArea = ({
     );
 };
 
-const LogView = ({ steps, currentStep, goToStep, logViewRef, isDark }) => {
-    const getStepStyle = (type) => ({ 
-        start: "bg-indigo-600/90", 
-        visit: "bg-purple-600/90", 
-        enqueue: "bg-pink-600/90", 
-        finish: "bg-teal-600/90" 
-    }[type] || "bg-gray-600/90");
-
-    const cardClass = isDark 
-        ? "bg-[#0A0A0A]/60 border-white/5 backdrop-blur-md" 
-        : "bg-white/80 border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-2xl";
-    const titleClass = isDark ? "text-gray-300" : "text-slate-700";
-    const subTextClass = isDark ? "text-gray-400" : "text-slate-500";
+const ExplanationGraph = ({ isDark }) => {
+    const nodes = [
+        { id: "A", x: 200, y: 42, state: "start" },
+        { id: "B", x: 112, y: 112, state: "visited" },
+        { id: "C", x: 288, y: 112, state: "queue" },
+        { id: "D", x: 58, y: 188, state: "unvisited" },
+        { id: "E", x: 166, y: 188, state: "unvisited" },
+        { id: "F", x: 342, y: 188, state: "unvisited" }
+    ];
+    const edges = [["A", "B"], ["A", "C"], ["B", "D"], ["B", "E"], ["C", "F"]];
+    const nodeMap = Object.fromEntries(nodes.map((node) => [node.id, node]));
+    const fills = {
+        start: isDark ? "#6366f1" : "#e0e7ff",
+        visited: isDark ? "#16a34a" : "#dcfce7",
+        queue: isDark ? "#db2777" : "#fce7f3",
+        unvisited: isDark ? "#334155" : "#ffffff"
+    };
+    const labels = {
+        start: isDark ? "#ffffff" : "#4338ca",
+        visited: isDark ? "#ffffff" : "#166534",
+        queue: isDark ? "#ffffff" : "#9d174d",
+        unvisited: isDark ? "#cbd5e1" : "#475569"
+    };
 
     return (
-        <section className={`${cardClass} rounded-xl p-6 border shadow-lg mt-6`}>
-            <div className="flex justify-between items-center mb-4">
-                <h2 className={`flex items-center gap-2 text-lg font-semibold ${titleClass}`}>
-                    <Icon name="info"/>Log
-                </h2>
-                <span className={`text-xs ${subTextClass}`}>Step {currentStep + 1}/{steps.length}</span>
+        <div className={`${isDark ? "bg-black/20 border-white/5" : "bg-slate-50 border-slate-200"} rounded-2xl border p-4 md:p-6`}>
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <div>
+                    <h3 className={`text-base font-bold ${isDark ? "text-gray-200" : "text-slate-800"}`}>Graph Traversal Map</h3>
+                    <p className={`text-xs mt-1 ${isDark ? "text-gray-400" : "text-slate-500"}`}>BFS explores each layer from the start node before moving deeper.</p>
+                </div>
+                <div className="flex flex-wrap gap-3 text-[10px]">
+                    {["start", "visited", "queue", "unvisited"].map((state) => (
+                        <span key={state} className={`flex items-center gap-1.5 ${isDark ? "text-gray-400" : "text-slate-500"}`}>
+                            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: fills[state] }} />
+                            {state === "start" ? "Start" : state[0].toUpperCase() + state.slice(1)}
+                        </span>
+                    ))}
+                </div>
             </div>
-            <div ref={logViewRef} className="max-h-60 overflow-y-auto pr-2 space-y-2 custom-scrollbar">
-                {steps.map((step, index) => {
-                    const isCurrent = index === currentStep;
-                    const logMessageStyle = `p-3 rounded-lg shadow-sm transition-all duration-300 cursor-pointer ${getStepStyle(step.type)} ${
-                        isCurrent
-                        ? 'ring-2 ring-offset-2 ring-purple-400 opacity-100'
-                        : 'opacity-70 hover:opacity-100'
-                    } ${isCurrent && !isDark ? 'ring-offset-slate-100' : 'ring-offset-gray-800'}`;
+            <svg viewBox="0 0 400 230" className="w-full h-auto max-h-64" role="img" aria-label="Breadth-first search graph with start, visited, queued, and unvisited nodes">
+                {edges.map(([source, target]) => (
+                    <line key={`${source}-${target}`} x1={nodeMap[source].x} y1={nodeMap[source].y} x2={nodeMap[target].x} y2={nodeMap[target].y} stroke={isDark ? "#a78bfa" : "#94a3b8"} strokeWidth="3" />
+                ))}
+                {nodes.map((node) => (
+                    <g key={node.id}>
+                        <circle cx={node.x} cy={node.y} r="24" fill={fills[node.state]} stroke={isDark ? "#ffffff40" : "#cbd5e1"} strokeWidth="2" />
+                        <text x={node.x} y={node.y + 5} textAnchor="middle" fontSize="16" fontWeight="700" fill={labels[node.state]}>{node.id}</text>
+                    </g>
+                ))}
+            </svg>
+        </div>
+    );
+};
 
-                    return (
-                        <div key={index} onClick={() => goToStep(index)} className={logMessageStyle}>
-                            <div className="flex items-start gap-2">
-                                <span className="font-bold text-white/80 text-xs pt-0.5">{index + 1}.</span>
-                                <div className="flex-1">
-                                    <p className="text-white text-xs">{step.message}</p>
-                                    {step.queueState && (
-                                        <div className="mt-1.5 flex flex-wrap items-center gap-1">
-                                            <span className="text-[10px] font-bold text-white/60 mr-1">Q:</span>
-                                            {step.queueState.length > 0 ? (
-                                                step.queueState.map((nodeId, idx) => (
-                                                    <div key={idx} className="px-1.5 py-0.5 rounded-[4px] text-[10px] font-bold bg-white/20 text-white">
-                                                        {nodeId}
-                                                    </div>
-                                                ))
-                                            ) : <span className="text-[10px] italic text-white/40">empty</span>}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    );
-                })}
+const BFSComplexityGraph = ({ isDark }) => {
+    const [hoverData, setHoverData] = useState(null);
+    const [animate, setAnimate] = useState(false);
+    const graphRef = useRef(null);
+    const maxVertices = 25;
+    const maxCost = maxVertices * 2;
+    const padding = { top: 40, right: 80, bottom: 50, left: 60 };
+    const [size, setSize] = useState({ width: 600, height: 400 });
+
+    useEffect(() => {
+        if (!graphRef.current) return undefined;
+        const resize = () => setSize({ width: graphRef.current.offsetWidth, height: graphRef.current.offsetHeight });
+        resize();
+        window.addEventListener("resize", resize);
+        return () => window.removeEventListener("resize", resize);
+    }, []);
+
+    useEffect(() => {
+        if (!graphRef.current) return undefined;
+        const observer = new IntersectionObserver((entries) => setAnimate(entries[0].isIntersecting), { threshold: 0.3 });
+        observer.observe(graphRef.current);
+        return () => observer.disconnect();
+    }, []);
+
+    const { width, height } = size;
+    const vertexToX = (vertices) => padding.left + ((vertices - 1) / (maxVertices - 1)) * (width - padding.left - padding.right);
+    const costToY = (cost) => height - padding.bottom - (cost / maxCost) * (height - padding.top - padding.bottom);
+    const xToVertices = (x) => Math.round(1 + ((x - padding.left) / (width - padding.left - padding.right)) * (maxVertices - 1));
+    const makePath = (costFunction) => Array.from({ length: maxVertices }, (_, index) => {
+        const vertices = index + 1;
+        return `${vertexToX(vertices)},${costToY(costFunction(vertices))}`;
+    }).join(" ");
+
+    const handleMouseMove = (event) => {
+        const bounds = graphRef.current.getBoundingClientRect();
+        const x = ((event.clientX - bounds.left) / bounds.width) * width;
+        if (x < padding.left || x > width - padding.right) {
+            setHoverData(null);
+            return;
+        }
+        const vertices = Math.max(1, Math.min(maxVertices, xToVertices(x)));
+        setHoverData({ vertices, x: vertexToX(vertices), time: vertices * 2, space: vertices });
+    };
+
+    const axisColor = isDark ? "#e5e7eb" : "#475569";
+    const gridColor = isDark ? "#4b5563" : "#cbd5e1";
+    const textColor = isDark ? "#d1d5db" : "#475569";
+    const containerClass = isDark ? "bg-gray-900/90 border-gray-700" : "bg-white/90 border-slate-200 shadow-xl";
+
+    return (
+        <div className={`${containerClass} p-4 rounded-2xl border relative`}>
+            <h3 className={`text-xl font-bold text-center mb-4 ${isDark ? "text-gray-100" : "text-slate-800"}`}>BFS Time and Space Complexity</h3>
+            <div ref={graphRef} className="relative w-full h-[450px] cursor-crosshair" onMouseMove={handleMouseMove} onMouseLeave={() => setHoverData(null)}>
+                <svg width={width} height={height} role="img" aria-label="BFS time and space complexity grow linearly">
+                    <line x1={padding.left} y1={padding.top} x2={padding.left} y2={height - padding.bottom} stroke={axisColor} strokeWidth="2" />
+                    <line x1={padding.left} y1={height - padding.bottom} x2={width - padding.right} y2={height - padding.bottom} stroke={axisColor} strokeWidth="2" />
+                    {[0, 10, 20, 30, 40].map((value) => (
+                        <g key={value}>
+                            <line x1={padding.left} y1={costToY(value)} x2={width - padding.right} y2={costToY(value)} stroke={gridColor} strokeDasharray="3 3" />
+                            <text x={padding.left - 10} y={costToY(value) + 4} textAnchor="end" className="text-xs" fill={textColor}>{value}</text>
+                        </g>
+                    ))}
+                    <text x={padding.left + (width - padding.left - padding.right) / 2} y={height - 10} textAnchor="middle" className="font-medium text-sm" fill={textColor}>Graph Size (V + E)</text>
+                    <path d={`M ${makePath((vertices) => vertices * 2)}`} fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeDasharray="2000" strokeDashoffset={animate ? "0" : "2000"} style={{ transition: "stroke-dashoffset 1.5s ease-out" }} />
+                    <path d={`M ${makePath((vertices) => vertices)}`} fill="none" stroke="#22c55e" strokeWidth="2.5" strokeDasharray="2000" strokeDashoffset={animate ? "0" : "2000"} style={{ transition: "stroke-dashoffset 2s ease-out 0.5s" }} />
+                    <text x={vertexToX(maxVertices) + 5} y={costToY(maxVertices * 2) - 3} textAnchor="start" className="fill-blue-500 text-xs">Time O(V + E)</text>
+                    <text x={vertexToX(maxVertices) + 5} y={costToY(maxVertices) - 3} textAnchor="start" className="fill-green-500 text-xs">Space O(V)</text>
+                    {hoverData && (
+                        <g>
+                            <line x1={hoverData.x} y1={padding.top} x2={hoverData.x} y2={height - padding.bottom} stroke={axisColor} strokeDasharray="4 4" opacity="0.6" />
+                            {[{ y: costToY(hoverData.time), color: "#3b82f6" }, { y: costToY(hoverData.space), color: "#22c55e" }].map((point, index) => (
+                                <circle key={index} cx={hoverData.x} cy={point.y} r="5" fill={point.color} stroke="white" strokeWidth="1.5" className="transition-all duration-300 ease-out" />
+                            ))}
+                            {(() => {
+                                const boxWidth = 130;
+                                const boxHeight = 58;
+                                let tooltipX = hoverData.x + 15;
+                                let tooltipY = costToY(hoverData.time) - boxHeight - 10;
+                                if (tooltipX + boxWidth > width - padding.right) tooltipX = hoverData.x - boxWidth - 15;
+                                tooltipX = Math.max(padding.left, tooltipX);
+                                if (tooltipY < padding.top) tooltipY = costToY(hoverData.space) + 15;
+                                if (tooltipY + boxHeight > height - padding.bottom) tooltipY = height - padding.bottom - boxHeight;
+                                return (
+                                    <g transform={`translate(${tooltipX}, ${tooltipY})`} className="transition-transform duration-100 ease-out">
+                                        <rect width={boxWidth} height={boxHeight} rx="6" fill={isDark ? "black" : "white"} stroke={isDark ? "none" : "#cbd5e1"} opacity="0.9" />
+                                        <text x="8" y="18" className="text-xs" fill={isDark ? "white" : "black"}>V + E = {hoverData.vertices}</text>
+                                        <text x="8" y="35" className="fill-blue-500 text-xs">Time: {hoverData.time}</text>
+                                        <text x="8" y="52" className="fill-green-500 text-xs">Space: {hoverData.space}</text>
+                                    </g>
+                                );
+                            })()}
+                        </g>
+                    )}
+                </svg>
             </div>
-        </section>
+            <div className="flex justify-center gap-6 text-xs mt-2">
+                <span className="flex items-center gap-2 text-blue-500"><span className="w-3 h-1 rounded bg-blue-500" />Traversal work</span>
+                <span className="flex items-center gap-2 text-green-500"><span className="w-3 h-1 rounded bg-green-500" />Queue space</span>
+            </div>
+        </div>
     );
 };
 
@@ -604,161 +549,416 @@ const BFSWalkthroughStep = ({ data, graphData, isDark }) => {
 
 const ExplanationTab = ({ isDark }) => {
     const cardClass = isDark ? "bg-[#0A0A0A]/60 border-white/5 backdrop-blur-md" : "bg-white/80 border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-2xl";
-    const sectionClasses = `${cardClass} p-6 rounded-2xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-600/10`;
+    const sectionClasses = `${cardClass} p-6 md:p-8 rounded-2xl border transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-purple-600/20`;
     const titleColor = isDark ? "text-gray-200" : "text-slate-800";
     const textColor = isDark ? "text-gray-300" : "text-slate-600";
     const listColor = isDark ? "text-gray-400" : "text-slate-500";
     const innerCardClass = isDark ? "bg-gray-900/50 border-gray-700" : "bg-slate-50 border-slate-200";
 
     const exampleGraphData = {
-      nodes: [ 
-        { id: "A", x: 150, y: 30 }, 
-        { id: "B", x: 80, y: 90 }, 
-        { id: "C", x: 220, y: 90 }, 
-        { id: "D", x: 40, y: 150 }, 
-        { id: "F", x: 120, y: 150 }, 
-        { id: "E", x: 260, y: 150 } 
+      nodes: [
+        { id: "A", x: 150, y: 30 },
+        { id: "B", x: 80, y: 90 },
+        { id: "C", x: 220, y: 90 },
+        { id: "D", x: 40, y: 150 },
+        { id: "F", x: 120, y: 150 },
+        { id: "E", x: 260, y: 150 }
       ],
-      edges: [ 
-        { source: "A", target: "B" }, { source: "A", target: "C" }, 
-        { source: "B", target: "D" }, { source: "B", target: "F" }, 
+      edges: [
+        { source: "A", target: "B" }, { source: "A", target: "C" },
+        { source: "B", target: "D" }, { source: "B", target: "F" },
         { source: "C", target: "E" }
       ]
     };
 
     const walkthroughSteps = [
-        { 
+        {
             id: 1,
-            title: "Initialization", 
-            description: "Start at the root node 'A'. Add 'A' to the Queue and mark it as 'Current'.", 
-            queue: ["A"], 
+            title: "Initialization",
+            description: "Start at the root node 'A'. Mark it visited and enqueue it so BFS begins exploring from the source.",
+            queue: ["A"],
             currentNode: "A",
-            nodeStates: { A: 'current', B: 'default', C: 'default', D: 'default', E: 'default', F: 'default' } 
+            nodeStates: { A: 'current', B: 'default', C: 'default', D: 'default', E: 'default', F: 'default' }
         },
-        { 
+        {
             id: 2,
-            title: "Explore A", 
-            description: "Process 'A'. Found unvisited neighbors 'B' and 'C'. Mark 'A' visited, enqueue B and C.", 
-            queue: ["B", "C"], 
+            title: "Visit A",
+            description: "Process 'A' and discover 'B' and 'C'. Queue them in order, then continue with the next node at the front.",
+            queue: ["B", "C"],
             currentNode: "A",
-            nodeStates: { A: 'visited', B: 'queue', C: 'queue', D: 'default', E: 'default', F: 'default' } 
+            nodeStates: { A: 'visited', B: 'queue', C: 'queue', D: 'default', E: 'default', F: 'default' }
         },
-        { 
+        {
             id: 3,
-            title: "Process B", 
-            description: "Dequeue 'B'. It becomes current. Explore its neighbors 'D' and 'F'.", 
-            queue: ["C"], 
+            title: "Visit B",
+            description: "Dequeue 'B'. Explore its neighbors 'D' and 'F'. Since they are unvisited, they get added to the queue.",
+            queue: ["C", "D", "F"],
             currentNode: "B",
-            nodeStates: { A: 'visited', B: 'current', C: 'queue', D: 'default', E: 'default', F: 'default' } 
+            nodeStates: { A: 'visited', B: 'visited', C: 'queue', D: 'queue', F: 'queue', E: 'default' }
         },
-        { 
+        {
             id: 4,
-            title: "Explore B", 
-            description: "Add unvisited neighbors 'D' and 'F' to Queue. Mark 'B' visited.", 
-            queue: ["C", "D", "F"], 
-            currentNode: "B",
-            nodeStates: { A: 'visited', B: 'visited', C: 'queue', D: 'queue', F: 'queue', E: 'default' } 
+            title: "Visit C",
+            description: "Process 'C' next. Its only unvisited neighbor is 'E', which is now added to the end of the queue.",
+            queue: ["D", "F", "E"],
+            currentNode: "C",
+            nodeStates: { A: 'visited', B: 'visited', C: 'visited', D: 'queue', F: 'queue', E: 'queue' }
         },
-        { 
+        {
             id: 5,
-            title: "Process C", 
-            description: "Dequeue 'C'. Explore its neighbor 'E'.", 
-            queue: ["D", "F"], 
-            currentNode: "C",
-            nodeStates: { A: 'visited', B: 'visited', C: 'current', D: 'queue', F: 'queue', E: 'default' } 
-        },
-        { 
-            id: 6,
-            title: "Explore C", 
-            description: "Add 'E' to Queue. Mark 'C' visited.", 
-            queue: ["D", "F", "E"], 
-            currentNode: "C",
-            nodeStates: { A: 'visited', B: 'visited', C: 'visited', D: 'queue', F: 'queue', E: 'queue' } 
+            title: "Finish Level Order",
+            description: "The traversal continues layer by layer. BFS ensures every node at the current depth is processed before any deeper node.",
+            queue: ["E"],
+            currentNode: "D",
+            nodeStates: { A: 'visited', B: 'visited', C: 'visited', D: 'visited', F: 'visited', E: 'queue' }
         }
     ];
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8 animate-fadeIn">
+        <section className={`${isDark ? 'text-gray-300' : 'text-slate-600'} animate-fadeIn`}>
+            <div className="max-w-6xl mx-auto space-y-12">
             <div className={sectionClasses}>
-                <h2 className="flex items-center gap-3 text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-400">
-                    <Icon name="grid" className="w-6 h-6 text-purple-400"/> Breadth-First Search (BFS)
+                <h2 className="flex items-center justify-center gap-3 text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-400">
+                    <ArrowUpNarrowWide className="w-6 h-6 text-purple-400" /> What is Breadth-First Search?
                 </h2>
-                <p className={`leading-relaxed text-sm ${textColor}`}>
-                    BFS is a fundamental graph traversal algorithm. It starts at a selected node (root) and explores all of its neighbor nodes at the present depth prior to moving on to the nodes at the next depth level. It uses a <strong>Queue</strong> data structure to keep track of visited vertices.
+                <p className={`text-sm leading-relaxed text-center ${textColor}`}>
+                    Breadth-First Search is a graph traversal algorithm that starts from a chosen source node and explores all neighbors at the current depth before moving deeper. It uses a queue to maintain order, making it ideal for finding shortest paths in unweighted graphs, detecting connected components, and exploring layered structures.
                 </p>
             </div>
 
-             <div className={sectionClasses}>
-                <h3 className={`flex items-center justify-center gap-2 text-lg font-bold mb-8 ${titleColor}`}>
-                    <Icon name="example"/> Detailed Step-by-Step Walkthrough
+            <div className={sectionClasses}>
+                <h3 className={`flex items-center justify-center gap-3 text-lg font-bold mb-6 ${titleColor}`}>
+                    <Wand2 className="w-5 h-5 text-purple-400" /> How BFS Works Step by Step
                 </h3>
-                
+                <div className="mb-8">
+                    <h4 className={`text-lg text-center font-semibold mb-4 ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>Graph Traversal Map</h4>
+                    <ExplanationGraph isDark={isDark} />
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {walkthroughSteps.map((step, index) => (
-                        <BFSWalkthroughStep 
-                            key={index} 
-                            data={step} 
-                            graphData={exampleGraphData} 
-                            isDark={isDark} 
+                    {walkthroughSteps.map((step) => (
+                        <BFSWalkthroughStep
+                            key={step.id}
+                            data={step}
+                            graphData={exampleGraphData}
+                            isDark={isDark}
                         />
                     ))}
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className={sectionClasses}>
-                    <h3 className={`flex items-center gap-2 text-lg font-bold mb-4 ${titleColor}`}><Icon name="check" className="text-green-500"/> Pros</h3>
-                    <ul className={`space-y-2 text-sm ${listColor}`}>
-                        <li className="flex gap-2"><span className="text-green-500">✓</span> Finds shortest path in unweighted graphs.</li>
-                        <li className="flex gap-2"><span className="text-green-500">✓</span> Complete: Will find a solution if one exists.</li>
-                        <li className="flex gap-2"><span className="text-green-500">✓</span> Great for finding connected components.</li>
-                    </ul>
-                </div>
-                <div className={sectionClasses}>
-                    <h3 className={`flex items-center gap-2 text-lg font-bold mb-4 ${titleColor}`}><Icon name="xmark" className="text-red-500"/> Cons</h3>
-                    <ul className={`space-y-2 text-sm ${listColor}`}>
-                         <li className="flex gap-2"><span className="text-red-500">✗</span> Memory intensive (stores all nodes at current level).</li>
-                         <li className="flex gap-2"><span className="text-red-500">✗</span> Slower than DFS if target is deep in graph.</li>
-                    </ul>
-                </div>
+            <div className={sectionClasses}>
+                <h3 className={`flex items-center gap-3 text-lg font-bold mb-6 ${titleColor}`}>
+                    <Code2 className="w-5 h-5 text-purple-400" /> The Algorithm, Step by Step
+                </h3>
+                <ol className={`list-decimal list-inside space-y-4 text-sm leading-relaxed ${textColor}`}>
+                    <li>
+                        <strong>Choose a starting node.</strong>
+                        <ul className={`list-disc list-inside pl-6 mt-2 ${listColor}`}>
+                            <li>Mark it as visited and queue it for processing.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Dequeue the front node.</strong>
+                        <ul className={`list-disc list-inside pl-6 mt-2 ${listColor}`}>
+                            <li>Visit it and inspect all of its neighbors.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Visit unseen neighbors.</strong>
+                        <ul className={`list-disc list-inside pl-6 mt-2 ${listColor}`}>
+                            <li>If a neighbor has not been visited yet, mark it visited and enqueue it.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Repeat until the queue is empty.</strong>
+                        <ul className={`list-disc list-inside pl-6 mt-2 ${listColor}`}>
+                            <li>Because BFS processes nodes by level, it guarantees the shortest path in an unweighted graph.</li>
+                        </ul>
+                    </li>
+                </ol>
             </div>
 
-             <div className={sectionClasses}>
-                <h3 className={`flex items-center gap-2 text-lg font-bold mb-6 ${titleColor}`}>
-                    <Icon name="chart"/> Complexity Analysis
+            <div className={sectionClasses}>
+                <h3 className={`flex items-center gap-3 text-lg font-bold mb-6 ${titleColor}`}>
+                    <BarChart3 className="w-5 h-5 text-purple-400" /> Complexity Analysis
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className={`${innerCardClass} p-6 rounded-lg border text-center`}>
                         <h4 className={`flex items-center justify-center gap-2 text-base font-semibold mb-3 ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>
-                            <Icon name="time" className="w-5 h-5" /> Time Complexity
+                            <Clock className="w-5 h-5" /> Time Complexity
                         </h4>
                         <p className={`font-bold text-2xl mb-2 ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>O(V + E)</p>
                         <p className={`text-xs ${listColor}`}>
-                            Where <strong>V</strong> is the number of vertices and <strong>E</strong> is the number of edges. We visit every vertex and explore every edge once.
+                            Each vertex is visited once and each edge is examined once, so total time grows linearly with the graph size.
                         </p>
                     </div>
 
-                     <div className={`${innerCardClass} p-6 rounded-lg border text-center`}>
+                    <div className={`${innerCardClass} p-6 rounded-lg border text-center`}>
                         <h4 className={`flex items-center justify-center gap-2 text-base font-semibold mb-3 ${isDark ? 'text-sky-300' : 'text-sky-600'}`}>
-                            <Icon name="space" className="w-5 h-5" /> Space Complexity
+                            <Maximize className="w-5 h-5" /> Space Complexity
                         </h4>
-                        <div className="text-center">
-                            <p className={`font-bold text-2xl mb-2 ${isDark ? 'text-sky-300' : 'text-sky-700'}`}>O(V)</p>
-                            <p className={`text-xs ${listColor}`}>
-                                In the worst case (e.g., a star graph), the Queue might need to store the majority of vertices at once.
-                            </p>
-                        </div>
+                        <p className={`font-bold text-2xl mb-2 ${isDark ? 'text-sky-300' : 'text-sky-700'}`}>O(V)</p>
+                        <p className={`text-xs ${listColor}`}>
+                            The queue can contain many vertices at once, especially in wide graphs, which is why BFS uses extra memory proportional to the number of nodes.
+                        </p>
                     </div>
                 </div>
             </div>
-        </div>
+
+            <div className={sectionClasses}>
+                <h3 className={`flex items-center justify-center gap-3 text-lg font-bold mb-6 ${titleColor}`}>
+                    <Activity className="w-5 h-5 text-purple-400" /> Interactive Performance Graph
+                </h3>
+                <BFSComplexityGraph isDark={isDark} />
+            </div>
+
+            <div className={sectionClasses}>
+                <h3 className={`flex items-center gap-3 text-lg font-bold mb-6 ${titleColor}`}>
+                    <ArrowUpDown className="w-5 h-5 text-purple-400" /> Pros & Cons
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className={`p-6 rounded-lg border-l-4 border-green-500 ${innerCardClass}`}>
+                        <h4 className="text-base font-semibold text-green-500 mb-4">Advantages</h4>
+                        <ul className={`space-y-3 text-sm ${textColor}`}>
+                            <li className="flex items-start gap-3"><CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /><span><strong>Shortest unweighted paths:</strong> BFS discovers nodes in distance order, so the first visit gives the shortest path.</span></li>
+                            <li className="flex items-start gap-3"><CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /><span><strong>Complete traversal:</strong> It visits every node reachable from the selected start node.</span></li>
+                            <li className="flex items-start gap-3"><CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" /><span><strong>Clear level order:</strong> The queue makes each traversal layer easy to inspect and explain.</span></li>
+                        </ul>
+                    </div>
+                    <div className={`p-6 rounded-lg border-l-4 border-red-500 ${innerCardClass}`}>
+                        <h4 className="text-base font-semibold text-red-500 mb-4">Limitations</h4>
+                        <ul className={`space-y-3 text-sm ${textColor}`}>
+                            <li className="flex items-start gap-3"><XCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" /><span><strong>Queue memory:</strong> A wide graph can place many frontier nodes in the queue at once.</span></li>
+                            <li className="flex items-start gap-3"><XCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" /><span><strong>Unweighted graphs:</strong> BFS does not guarantee weighted shortest paths without adapting the algorithm.</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </section>
     );
+};
+
+const BFS_GRAPH_CODE = {
+  javascript: `/**
+ * BFS in Graph - JavaScript
+ * Explores all neighbors at the current depth before moving deeper.
+ */
+
+function bfs(graph, start) {
+  const visited = new Set([start]);
+  const queue = [start];
+  const order = [];
+
+  while (queue.length > 0) {
+    const node = queue.shift();
+    order.push(node);
+
+    for (const neighbor of graph[node] || []) {
+      if (!visited.has(neighbor)) {
+        visited.add(neighbor);
+        queue.push(neighbor);
+      }
+    }
+  }
+
+  return order;
+}
+
+const graph = {
+  A: ['B', 'C'],
+  B: ['A', 'D', 'E'],
+  C: ['A', 'F'],
+  D: ['B'],
+  E: ['B', 'F'],
+  F: ['C', 'E']
+};
+
+console.log('BFS Order:', bfs(graph, 'A'));`,
+
+  python: `"""
+BFS in Graph - Python
+"""
+from collections import deque
+
+
+def bfs(graph, start):
+    visited = {start}
+    queue = deque([start])
+    order = []
+
+    while queue:
+        node = queue.popleft()
+        order.append(node)
+
+        for neighbor in graph.get(node, []):
+            if neighbor not in visited:
+                visited.add(neighbor)
+                queue.append(neighbor)
+
+    return order
+
+
+graph = {
+    'A': ['B', 'C'],
+    'B': ['A', 'D', 'E'],
+    'C': ['A', 'F'],
+    'D': ['B'],
+    'E': ['B', 'F'],
+    'F': ['C', 'E']
+}
+
+print('BFS Order:', bfs(graph, 'A'))`,
+
+  cpp: `#include <iostream>
+#include <queue>
+#include <set>
+#include <vector>
+#include <unordered_map>
+
+using namespace std;
+
+vector<char> bfs(const unordered_map<char, vector<char>>& graph, char start) {
+    set<char> visited = {start};
+    queue<char> q;
+    q.push(start);
+    vector<char> order;
+
+    while (!q.empty()) {
+        char node = q.front();
+        q.pop();
+        order.push_back(node);
+
+        for (char neighbor : graph.at(node)) {
+            if (!visited.count(neighbor)) {
+                visited.insert(neighbor);
+                q.push(neighbor);
+            }
+        }
+    }
+
+    return order;
+}
+
+int main() {
+    unordered_map<char, vector<char>> graph = {
+        {'A', {'B', 'C'}},
+        {'B', {'A', 'D', 'E'}},
+        {'C', {'A', 'F'}},
+        {'D', {'B'}},
+        {'E', {'B', 'F'}},
+        {'F', {'C', 'E'}}
+    };
+
+    auto result = bfs(graph, 'A');
+    for (char node : result) cout << node << ' ';
+    cout << '\n';
+    return 0;
+}`,
+
+  java: `/**
+ * BFS in Graph - Java
+ * Uses an adjacency list, queue, and visited set.
+ */
+
+import java.util.*;
+
+public class Main {
+    static List<Character> bfs(Map<Character, List<Character>> graph, char start) {
+        Set<Character> visited = new HashSet<>();
+        Queue<Character> queue = new ArrayDeque<>();
+        List<Character> order = new ArrayList<>();
+
+        visited.add(start);
+        queue.offer(start);
+
+        while (!queue.isEmpty()) {
+            char node = queue.poll();
+            order.add(node);
+
+            for (char neighbor : graph.getOrDefault(node, List.of())) {
+                if (visited.add(neighbor)) {
+                    queue.offer(neighbor);
+                }
+            }
+        }
+
+        return order;
+    }
+
+    public static void main(String[] args) {
+        Map<Character, List<Character>> graph = new HashMap<>();
+        graph.put('A', Arrays.asList('B', 'C'));
+        graph.put('B', Arrays.asList('A', 'D', 'E'));
+        graph.put('C', Arrays.asList('A', 'F'));
+        graph.put('D', List.of('B'));
+        graph.put('E', Arrays.asList('B', 'F'));
+        graph.put('F', Arrays.asList('C', 'E'));
+
+        System.out.println("BFS Order: " + bfs(graph, 'A'));
+    }
+}`,
+
+  c: `/**
+ * BFS in Graph - C
+ * Uses an adjacency matrix and a fixed-size queue.
+ */
+
+#include <stdio.h>
+#include <stdbool.h>
+
+#define VERTICES 6
+
+void bfs(int graph[VERTICES][VERTICES], int start) {
+    bool visited[VERTICES] = {false};
+    int queue[VERTICES];
+    int front = 0;
+    int back = 0;
+
+    visited[start] = true;
+    queue[back++] = start;
+
+    while (front < back) {
+        int node = queue[front++];
+        printf("%c ", 'A' + node);
+
+        for (int neighbor = 0; neighbor < VERTICES; neighbor++) {
+            if (graph[node][neighbor] && !visited[neighbor]) {
+                visited[neighbor] = true;
+                queue[back++] = neighbor;
+            }
+        }
+    }
+}
+
+int main(void) {
+    int graph[VERTICES][VERTICES] = {
+        {0, 1, 1, 0, 0, 0},
+        {1, 0, 0, 1, 1, 0},
+        {1, 0, 0, 0, 0, 1},
+        {0, 1, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 1},
+        {0, 0, 1, 0, 1, 0}
+    };
+
+    printf("BFS Order: ");
+    bfs(graph, 0);
+    printf("\\n");
+    return 0;
+}`
+};
+
+const BFS_GRAPH_STATS = {
+  time: "O(V + E)",
+  space: "O(V)",
+  stable: "Yes (level-order)"
 };
 
 //==============================================================================
 // Main BFSVisualizer Component
 //==============================================================================
 const BFSVisualizer = () => {
+    const navigate = useNavigate();
     // Redux Theme
     const theme = useSelector((state) => state.theme.value);
     const isDark = theme === "dark";
@@ -786,7 +986,6 @@ const BFSVisualizer = () => {
     const [edgeStartNode, setEdgeStartNode] = useState(null);
     const [copyTooltipText, setCopyTooltipText] = useState("Copy");
 
-    const logViewRef = useRef(null);
     const visContainerRef = useRef(null);
 
     // --- LOGIC: Graph Layout & Traversal ---
@@ -863,7 +1062,6 @@ const BFSVisualizer = () => {
     const handleClearGraph = () => { setGraph({ nodes: [], edges: [] }); setStartNodeId(null); resetVisualizationState(); };
     useEffect(() => { handleReset(); }, []); 
     useEffect(() => { let timer; if (isSorting && !isPaused && !isFinished) timer = setTimeout(runSortStep, 1000 - speed * 9); return () => clearTimeout(timer); }, [isSorting, isPaused, isFinished, runSortStep, speed]);
-    useEffect(() => { if (logViewRef.current && !isReviewingPastStep) logViewRef.current.scrollTop = logViewRef.current.scrollHeight; }, [steps, isReviewingPastStep]);
     
     const handleCanvasClick = (e) => {
         if (editMode !== 'addNode') return;
@@ -955,8 +1153,8 @@ const BFSVisualizer = () => {
                                 Interactive demonstration of Breadth-First Search.
                             </p>
                             <div className="mt-6 flex justify-center items-center gap-4">
-                                <GlossyButton onClick={handleCopy} gradientClasses="bg-gradient-to-r from-purple-600 to-indigo-600" className="w-[150px]" isDark={isDark}><Icon name="copy" /><span>{copyTooltipText}</span></GlossyButton>
-                                <GlossyButton onClick={handleShare} gradientClasses="bg-gradient-to-r from-pink-600 to-purple-600" className="w-[150px]" isDark={isDark}><Icon name="share" /><span>Share</span></GlossyButton>
+                                <GlossyButton onClick={handleCopy} gradientClasses="bg-gradient-to-r from-purple-600 to-indigo-600" className="w-[150px]" isDark={isDark}><Copy className="w-4 h-4" /><span>{copyTooltipText}</span></GlossyButton>
+                                <GlossyButton onClick={handleShare} gradientClasses="bg-gradient-to-r from-pink-600 to-purple-600" className="w-[150px]" isDark={isDark}><Share2 className="w-4 h-4" /><span>Share</span></GlossyButton>
                             </div>
                         </div>
                     </div>
@@ -966,6 +1164,10 @@ const BFSVisualizer = () => {
                     <div className={`flex border-b ${isDark ? "border-gray-700" : "border-slate-200"}`}>
                         <button className={`px-4 py-2 text-sm font-medium transition-colors ${getTabClass("visualization")}`} onClick={() => setActiveTab("visualization")}>Visualization</button>
                         <button className={`px-4 py-2 text-sm font-medium transition-colors ${getTabClass("explanation")}`} onClick={() => setActiveTab("explanation")}>Explanation</button>
+                        <button className={`px-4 py-2 text-sm font-medium transition-colors ${getTabClass("code")}`} onClick={() => setActiveTab("code")}>Code & Practice</button>
+                        <button className={`px-4 py-2 text-sm font-medium transition-colors flex items-center gap-2 ${getTabClass("quiz")}`} onClick={() => setActiveTab("quiz")}>
+                            <BrainCircuit size={16} /> Mastery Arena
+                        </button>
                     </div>
 
                     {activeTab === "visualization" ? (
@@ -980,10 +1182,9 @@ const BFSVisualizer = () => {
                                         startNodeId={startNodeId} isDark={isDark}
                                     />
                                     <QueueDisplay queue={queueToDisplay} isDark={isDark} />
-                                    <LogView steps={steps} currentStep={currentStep} goToStep={goToStep} logViewRef={logViewRef} isDark={isDark} />
                                 </div>
                                 <div className="lg:col-span-1 h-fit sticky top-6">
-                                     <Controls
+                                     <BFSControls
                                         isFinished={isFinished} isPaused={isPaused} graph={graph} currentStep={currentStep} steps={steps} speed={speed} editMode={editMode}
                                         startNodeId={startNodeId} setStartNodeId={setStartNodeId} graphType={graphType} setGraphType={setGraphType} isSorting={isSorting}
                                         toggleSorting={toggleSorting} stepBackward={stepBackward} stepForward={stepForward} setSpeed={setSpeed} setEditMode={setEditMode}
@@ -992,9 +1193,16 @@ const BFSVisualizer = () => {
                                     />
                                 </div>
                              </div>
+                                      <div className="w-full mt-6">
+                                          <BFSLogView steps={steps} currentStep={currentStep} goToStep={goToStep} isDark={isDark} />
+                                      </div>
                         </div>
-                    ) : (
+                    ) : activeTab === "explanation" ? (
                         <ExplanationTab isDark={isDark} />
+                    ) : activeTab === "code" ? (
+                        <PremiumCodeReference codeData={BFS_GRAPH_CODE} complexity={BFS_GRAPH_STATS} isDark={isDark} />
+                    ) : (
+                        <QuizArena algoKey="BFS-in-Graph" isDark={isDark} onMasteryComplete={() => navigate('/dashboard')} />
                     )}
                 </div>
 

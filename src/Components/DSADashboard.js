@@ -289,7 +289,7 @@ const DSADashboard = () => {
                     {/* Bottom: Button - Purple Hover */}
                     <div className="relative z-10 mt-2">
                       <button
-                        onClick={() => navigate(`/algorithms/${algo.name}`)}
+                        onClick={() => navigate(`/algorithms/${algo.name === "Two Pointer-Technique" ? "Two-Pointer-Technique" : algo.name}`)}
                         className={`w-full py-2.5 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all duration-300 border
                           ${isDark 
                             ? "bg-white/5 border-white/10 text-white hover:bg-white hover:text-black hover:border-white" 

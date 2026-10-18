@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { useState } from "react";
 
 // --- ANIMATION VARIANTS ---
+// HOT RELOAD TEST - This should update automatically in browser
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -209,6 +210,7 @@ export default function Body() {
               ${isDark ? "from-indigo-400 via-purple-400 to-pink-400" : "from-indigo-600 via-purple-600 to-pink-600"}`}>
               Algorithms
             </span>
+            <div className="text-sm text-green-500 mt-2">🔥 Hot Reload Working!</div>
           </h1>
 
           <p className={`text-base md:text-lg mb-10 max-w-xl mx-auto lg:mx-0 font-medium leading-relaxed
